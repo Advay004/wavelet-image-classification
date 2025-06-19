@@ -65,6 +65,7 @@ This script:
 - Add Docker setup for easy deployment
 - Deploy to a cloud platform (currently runs locally)
 
+## Find the website at https://wavelet-image-classification.onrender.com/
 ## 🧑‍💻 Author
 Made with ❤️ by [Advay](https://github.com/Advay004)
 
