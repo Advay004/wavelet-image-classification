@@ -1,0 +1,14 @@
+blinker==1.9.0
+click==8.2.1
+Flask==3.1.1
+itsdangerous==2.2.0
+Jinja2==3.1.6
+joblib==1.5.1
+MarkupSafe==3.0.2
+numpy==2.3.0
+opencv-python==4.11.0.86
+PyWavelets==1.8.0
+scikit-learn==1.7.0
+scipy==1.15.3
+threadpoolctl==3.6.0
+Werkzeug==3.1.3

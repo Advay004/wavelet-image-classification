@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Face Classifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(-45deg, #091133, #27123b, #2b0d2f, #40060e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .neon-glow {
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff;
+        }
+        
+        .upload-zone {
+            transition: all 0.3s ease;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px dashed rgba(0, 255, 255, 0.5);
+        }
+        
+        .upload-zone:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            transform: scale(1.05);
+        }
+        
+        .upload-zone.dragover {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+            transform: scale(1.05);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            to { box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
+        }
+        
+        .prediction-enter {
+            animation: predictionEnter 0.8s ease-out;
+        }
+        
+        @keyframes predictionEnter {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotateY(90deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+        
+        .loading {
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #00ffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 6s linear infinite;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Floating Particles -->
+    <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
+    
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8 floating">
+            <h1 class="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 neon-glow mb-4">
+                FACE CLASSIFIER 3000
+            </h1>
+            <p class="text-cyan-300 text-lg md:text-xl font-semibold">
+                Advanced Neural Recognition System
+            </p>
+        </div>
+
+        <!-- Main Upload Container -->
+        <div class="glass-morphism rounded-3xl p-8 md:p-12 w-full max-w-2xl pulse-glow">
+            <form id="uploadForm" action="/" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Upload Zone -->
+                <div id="uploadZone" class="upload-zone rounded-2xl p-12 text-center cursor-pointer relative overflow-hidden">
+                    <input type="file" id="fileInput" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                    
+                    <div id="uploadContent" class="space-y-4">
+                        <div class="text-6xl">🚀</div>
+                        <h3 class="text-2xl font-bold text-cyan-300">Drop Your Image Here</h3>
+                        <p class="text-cyan-200">Or click to browse files</p>
+                        <div class="text-sm text-cyan-400 mt-2">
+                            Supported formats: JPG, PNG, GIF
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden space-y-4">
+                        <div class="loading mx-auto"></div>
+                        <p class="text-cyan-300 text-xl font-semibold">Analyzing Image...</p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg">
+                    <span class="flex items-center justify-center space-x-2">
+                        <span>🔍</span>
+                        <span>CLASSIFY IMAGE</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Container - Show if prediction exists -->
+        {% if prediction %}
+        <div id="resultsContainer" class="mt-8 w-full max-w-2xl">
+            <div class="glass-morphism rounded-3xl p-8 text-center prediction-enter">
+                <div id="predictionResult" class="space-y-4">
+                    {% set clean_prediction = prediction.strip().lower() if prediction else '' %}
+                    {% if 'virat' in clean_prediction %}
+                        <div class="text-8xl mb-4">🏏</div>
+                        <h2 class="text-4xl font-black text-yellow-400 mb-2">VIRAT KOHLI!</h2>
+                        <p class="text-yellow-300 text-xl">The King has been identified!</p>
+                        <div class="mt-4 text-6xl">👑</div>
+                    {% elif 'scarlett' in clean_prediction or 'johansson' in clean_prediction %}
+                        <div class="text-8xl mb-4">🌟</div>
+                        <h2 class="text-4xl font-black text-red-400 mb-2">SCARLETT JOHANSSON!</h2>
+                        <p class="text-red-300 text-xl">Hollywood superstar detected!</p>
+                        <div class="mt-4 text-6xl">💫</div>
+                    {% else %}
+                        <div class="text-8xl mb-4">🤔</div>
+                        <h2 class="text-4xl font-black text-green-400 mb-2">MYSTERY PERSON!</h2>
+                        <p class="text-green-300 text-xl">Someone else entirely... interesting! 🕵️‍♂️</p>
+                        <div class="mt-4 text-6xl">🎭</div>
+                        <div class="mt-6 p-4 glass-morphism rounded-lg">
+                            <p class="text-sm text-cyan-300">Fun fact: Even AI gets confused sometimes! 😄</p>
+                            <p class="text-xs text-cyan-400 mt-2">Debug - Raw: "{{ prediction }}" | Clean: "{{ clean_prediction }}"</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="mt-12 text-center">
+            <p class="text-cyan-400 text-sm">
+                Powered by Advanced AI • Real-time Processing
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particlesContainer.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 6000);
+            }, 500);
+        }
+
+        // Drag and drop functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingState = document.getElementById('loadingState');
+        const uploadContent = document.getElementById('uploadContent');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            uploadZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            uploadZone.classList.remove('dragover');
+        }
+
+        // Handle dropped files
+        uploadZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        }
+
+        // Handle file input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file.type.startsWith('image/')) {
+                uploadContent.innerHTML = `
+                    <div class="text-4xl">✅</div>
+                    <h3 class="text-xl font-bold text-green-400">Image Selected</h3>
+                    <p class="text-green-300">${file.name}</p>
+                `;
+            }
+        }
+
+        // Show loading state on form submission
+        uploadForm.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Please select an image first!');
+                return;
+            }
+
+            // Show loading state
+            uploadContent.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            
+            // Let the form submit naturally to Flask
+        });
+
+        // Initialize particles
+        createParticles();
+
+        // Auto-scroll to results if they exist
+        {% if prediction %}
+        setTimeout(() => {
+            const resultsContainer = document.getElementById('resultsContainer');
+            if (resultsContainer) {
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 500);
+        {% endif %}
+    </script>
+</body>
+</html>
