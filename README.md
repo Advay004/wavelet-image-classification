@@ -1,4 +1,4 @@
-```markdown
+
 # Wavelet Face Classifier
 
 A project that combines **image processing** and **machine learning** to classify face images into **Virat Kohli** or **Scarlett Johansson** using wavelet features and raw pixel features. It includes a **Flask web interface** for users to upload images and receive classification results.
@@ -11,20 +11,6 @@ The model classifies uploaded face images into one of two categories:
 ## 🖼️ Inputs
 - Users upload a face image (`.jpg`, `.png`, etc.) via a web form.
 - The backend processes the image using OpenCV, applies wavelet transform, and performs classification.
-
-## 📁 Directory Structure
-```
-wavelet-image-classification/
-├── app.py                  # Flask web server
-├── model.pkl               # Trained ML model
-├── training.py             # Feature extraction & model training
-├── requirements.txt        # Python dependencies
-├── templates/
-│   └── index.html          # HTML for the web UI
-├── static/                 # (optional) CSS or uploaded files
-├── README.md               # This file
-└── .gitignore              # To exclude unnecessary files
-```
 
 ## 📊 Model & Algorithm
 - **Model Used:** `Support Vector Classifier (SVC)` from `scikit-learn`
